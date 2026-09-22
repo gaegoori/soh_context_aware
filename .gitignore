@@ -1,11 +1,39 @@
 .venv/
+.venv-*/
 __pycache__/
+.pycache/
 *.py[cod]
 .mplconfig/
 
 # Reproducible preprocessing and smoke-test artifacts
 cache/
 smoke_outputs/
+
+# Raw downloads and regenerated signal tensors
+*.zip
+data/raw/
+data/processed/**/*.npz
+
+# Current research data and experiment results stay local (code/docs publication only)
+data/processed/
+outputs/context_labels_*/
+outputs/reproduction/
+
+# Per-model weights/history can be regenerated; publish aggregate results
+*.pt
+*.pth
+outputs/context_labels_*/runs/
+outputs/**/*.partial/
+outputs/**/*.tmp
+outputs/reproduction/*.npz
+outputs/reproduction/*_predictions.csv
+outputs/reproduction/training_history.csv
+*.log
+
+# Local credentials
+.env
+.env.*
+!.env.example
 
 # OS/editor metadata
 .DS_Store
