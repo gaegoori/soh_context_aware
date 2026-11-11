@@ -52,11 +52,11 @@ Context는 최근 10-cycle 통계와 누적 이력을 포함한다. History-free
 ## 실행
 
 ```sh
-PYTHONDONTWRITEBYTECODE=1 .venv-repro/bin/python scripts/test_context_history.py
-PYTHONDONTWRITEBYTECODE=1 .venv-repro/bin/python -u scripts/train_context_history.py
-PYTHONDONTWRITEBYTECODE=1 .venv-repro/bin/python scripts/verify_context_history.py
+PYTHONDONTWRITEBYTECODE=1 .venv-repro/bin/python -m scripts.tests.test_context_history
+PYTHONDONTWRITEBYTECODE=1 .venv-repro/bin/python -u -m scripts.experiments.train_context_history
+PYTHONDONTWRITEBYTECODE=1 .venv-repro/bin/python -m scripts.validation.verify_context_history
 # Matplotlib가 설치된 별도 Python으로:
-python scripts/plot_context_history.py
+python -m scripts.plotting.plot_context_history
 ```
 
 동일 프로토콜에서 완료된 모델은 해시를 검증하여 재사용한다. 설정이나 학습 코드가 바뀌면 다른 출력 디렉터리를 지정해야 한다.

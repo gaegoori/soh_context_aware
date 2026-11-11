@@ -65,11 +65,11 @@ Context 정규화·길이 선택·선택한 구간 추출/정규화·한 Predict
 
 ```bash
 source .venv-repro/bin/activate
-python scripts/verify_lookback_oof.py
-python scripts/test_adaptive_selector.py
-python scripts/train_adaptive_selector.py --phase fit
-python scripts/train_adaptive_selector.py --phase evaluate
-python scripts/verify_adaptive_selector.py
+python -m scripts.validation.verify_lookback_oof
+python -m scripts.tests.test_adaptive_selector
+python -m scripts.experiments.train_adaptive_selector --phase fit
+python -m scripts.experiments.train_adaptive_selector --phase evaluate
+python -m scripts.validation.verify_adaptive_selector
 ```
 
 `protocol.json`은 학습 전에 데이터·코드 해시와 설정을 고정한다. 변경된 설정으로 기존

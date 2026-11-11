@@ -34,15 +34,15 @@
 
 ```bash
 # 작은 단위 검증
-PYTHONDONTWRITEBYTECODE=1 .venv-repro/bin/python scripts/test_lookback_oof.py
+PYTHONDONTWRITEBYTECODE=1 .venv-repro/bin/python -m scripts.tests.test_lookback_oof
 
 # Seed 42 전체 36개 모델
-PYTHONDONTWRITEBYTECODE=1 .venv-repro/bin/python scripts/train_lookback_oof.py --seeds 42
-PYTHONDONTWRITEBYTECODE=1 .venv-repro/bin/python scripts/verify_lookback_oof.py
+PYTHONDONTWRITEBYTECODE=1 .venv-repro/bin/python -m scripts.experiments.train_lookback_oof --seeds 42
+PYTHONDONTWRITEBYTECODE=1 .venv-repro/bin/python -m scripts.validation.verify_lookback_oof
 
 # 동일 출력 폴더에서 5 seeds로 확장: 완료된 seed 42는 재사용
-PYTHONDONTWRITEBYTECODE=1 .venv-repro/bin/python scripts/train_lookback_oof.py --seeds 42 0 1 2 3
-PYTHONDONTWRITEBYTECODE=1 .venv-repro/bin/python scripts/verify_lookback_oof.py
+PYTHONDONTWRITEBYTECODE=1 .venv-repro/bin/python -m scripts.experiments.train_lookback_oof --seeds 42 0 1 2 3
+PYTHONDONTWRITEBYTECODE=1 .venv-repro/bin/python -m scripts.validation.verify_lookback_oof
 ```
 
 기본 출력은 `outputs/context_labels_v1/`. 데이터/모델 코드/설정 해시가 다르면

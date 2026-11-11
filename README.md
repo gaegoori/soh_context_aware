@@ -1,5 +1,7 @@
 # Adaptive Temporal Context Selection for Battery SOH Estimation
 
+코드는 역할별로 정리되어 있습니다. [scripts 파일 안내](scripts/README.md)에서 전체 파일 역할과 새 실행 명령을 확인할 수 있습니다. 실행은 프로젝트 최상위에서 `python -m scripts.<폴더>.<파일명>` 형식을 사용합니다.
+
 **배터리의 운용 이력과 열화 상태에 따라 SOH 예측에 필요한 과거 정보의 길이를 선택하는 연구**입니다.
 
 NASA Randomized Battery Usage Dataset을 사용해 `Lookback = 10 / 20 / 50`을 비교하고,
@@ -13,6 +15,19 @@ Adaptive 방식의 성능 개선 여부는 실험으로 검증할 연구 가설�
 | Fixed Predictor와 OOF 라벨 생성 | [LOOKBACK_EXPERIMENT.md](LOOKBACK_EXPERIMENT.md) | `outputs/context_labels_v1/` |
 | Selector 학습 및 외부 평가 | [ADAPTIVE_SELECTOR_EXPERIMENT.md](ADAPTIVE_SELECTOR_EXPERIMENT.md) | `outputs/adaptive_selector_v1/` |
 | Context 변수 묶음 제거·Predictor 입력 비교 | [CONTEXT_HISTORY_EXPERIMENT.md](CONTEXT_HISTORY_EXPERIMENT.md) | `outputs/context_history_v1/` |
+| 기존 Predictor 고정·오차 예측형 Selector 비교 | [ERROR_SELECTOR_EXPERIMENT.md](ERROR_SELECTOR_EXPERIMENT.md) | `outputs/error_selector_v1/` |
+| 길이별 Context Ridge·두 Selector 비교 | [TEMPORAL_CONTEXT_REDESIGN.md](TEMPORAL_CONTEXT_REDESIGN.md) | `outputs/temporal_context_ridge_v1/` |
+| Predictor 유지·재학습과 Selector 전이 비교 | [SELECTOR_TRANSFER_EXPERIMENT.md](SELECTOR_TRANSFER_EXPERIMENT.md) | `outputs/selector_transfer_v1/` |
+| 추가 상온 자료 확보·전처리·최종 평가 셀 예약 | [DATA_EXPANSION.md](DATA_EXPANSION.md) | `data/processed/expanded_v1/` |
+| 확장 데이터 품질 처리·개발 셀 Ridge 기준 성능 | [EXPANDED_BASELINE_EXPERIMENT.md](EXPANDED_BASELINE_EXPERIMENT.md) | `outputs/expanded_predictor_baseline_v1/` |
+| 확장 데이터 Selector 학습·내부 보정 기준 비교 | [EXPANDED_SELECTOR_EXPERIMENT.md](EXPANDED_SELECTOR_EXPERIMENT.md) | `outputs/expanded_selector_v1/` |
+| 운용 변화 Context·선형/비선형 Selector 비교 | [CHANGE_SELECTOR_EXPERIMENT.md](CHANGE_SELECTOR_EXPERIMENT.md) | `outputs/change_selector_v1/` |
+
+### 길이별 Context Ridge 실험
+
+[Temporal Context 재설계](TEMPORAL_CONTEXT_REDESIGN.md)는 기존 Context ridge의 통계 산출 범위를 10/20/50 cycles로 바꾸어 비교한 탐색 실험입니다.
+고정 정보 6개 + 구간 통계 9개로 Predictor 입력을 15개로 맞추고, 고정된 짧은 Context로 길이를 선택하는 Selector를 평가합니다.
+새 Predictor의 OOF 오차로 분류형·오차 예측형 Selector를 각각 학습하고, 고정 길이 방식과 비교했습니다. 실행 및 독립 검증을 완료했으며, 결과는 위 로컬 출력 폴더에 보관합니다.
 
 GitHub에는 **코드와 실행 문서만** 포함합니다. 데이터·모델·결과·생성된 그림은 로컬에서 보관합니다.
 
@@ -289,19 +304,19 @@ data/raw/
 
 ```bash
 # Cycle 전처리와 원본 대조 검증
-.venv-repro/bin/python scripts/preprocess_main.py
-.venv-repro/bin/python scripts/verify_preprocessing.py
+.venv-repro/bin/python -m scripts.preprocessing.preprocess_main
+.venv-repro/bin/python -m scripts.validation.verify_preprocessing
 
 # 라벨 규칙 및 학습 재현성 단위 검증
-.venv-repro/bin/python scripts/test_lookback_oof.py
+.venv-repro/bin/python -m scripts.tests.test_lookback_oof
 
 # Seed 42로 전체 흐름 실행
-.venv-repro/bin/python scripts/train_lookback_oof.py --seeds 42
-.venv-repro/bin/python scripts/verify_lookback_oof.py
+.venv-repro/bin/python -m scripts.experiments.train_lookback_oof --seeds 42
+.venv-repro/bin/python -m scripts.validation.verify_lookback_oof
 
 # 5개 seed로 확장: 동일 설정의 완료된 모델은 재사용
-.venv-repro/bin/python scripts/train_lookback_oof.py --seeds 42 0 1 2 3
-.venv-repro/bin/python scripts/verify_lookback_oof.py
+.venv-repro/bin/python -m scripts.experiments.train_lookback_oof --seeds 42 0 1 2 3
+.venv-repro/bin/python -m scripts.validation.verify_lookback_oof
 ```
 
 전처리는 `data/processed/main_v1/`, 학습·라벨 생성은 `outputs/context_labels_v1/`에 저장합니다.
@@ -314,10 +329,10 @@ data/raw/
 5개 seed의 OOF 라벨 생성과 검증을 먼저 완료해야 합니다.
 
 ```bash
-.venv-repro/bin/python scripts/test_adaptive_selector.py
-.venv-repro/bin/python scripts/train_adaptive_selector.py --phase fit
-.venv-repro/bin/python scripts/train_adaptive_selector.py --phase evaluate
-.venv-repro/bin/python scripts/verify_adaptive_selector.py
+.venv-repro/bin/python -m scripts.tests.test_adaptive_selector
+.venv-repro/bin/python -m scripts.experiments.train_adaptive_selector --phase fit
+.venv-repro/bin/python -m scripts.experiments.train_adaptive_selector --phase evaluate
+.venv-repro/bin/python -m scripts.validation.verify_adaptive_selector
 ```
 
 출력은 로컬 `outputs/adaptive_selector_v1/`에 저장합니다.
@@ -328,14 +343,14 @@ data/raw/
 외부 평가 결과가 생성된 다음 실행합니다. 설정·코드·데이터 해시가 다르면 별도 출력 경로를 사용합니다.
 
 ```bash
-.venv-repro/bin/python scripts/test_context_history.py
-.venv-repro/bin/python scripts/train_context_history.py
-.venv-repro/bin/python scripts/verify_context_history.py
+.venv-repro/bin/python -m scripts.tests.test_context_history
+.venv-repro/bin/python -m scripts.experiments.train_context_history
+.venv-repro/bin/python -m scripts.validation.verify_context_history
 
 # Matplotlib 설치 후, 검증된 결과로 그림과 보고서 생성
-.venv-repro/bin/python scripts/plot_adaptive_results.py
-.venv-repro/bin/python scripts/plot_soh_predictions.py
-.venv-repro/bin/python scripts/plot_context_history.py
+.venv-repro/bin/python -m scripts.plotting.plot_adaptive_results
+.venv-repro/bin/python -m scripts.plotting.plot_soh_predictions
+.venv-repro/bin/python -m scripts.plotting.plot_context_history
 ```
 
 실험 설정은 [CONTEXT_HISTORY_EXPERIMENT.md](CONTEXT_HISTORY_EXPERIMENT.md)에 정의합니다.
@@ -345,21 +360,21 @@ data/raw/
 
 | 파일 | 역할 |
 |---|---|
-| [scripts/preprocess_main.py](scripts/preprocess_main.py) | Cycle 구성, 정답·Context 생성, 분할·정규화 |
-| [scripts/battery_data.py](scripts/battery_data.py) | 동일 샘플의 LB10·20·50 입력 로더 |
-| [scripts/train_lookback_oof.py](scripts/train_lookback_oof.py) | Predictor 학습, OOF 예측, 라벨 생성 |
-| [scripts/verify_preprocessing.py](scripts/verify_preprocessing.py) | 원본·전처리·분할 검증 |
-| [scripts/verify_lookback_oof.py](scripts/verify_lookback_oof.py) | 모델·예측·라벨·Context 검증 |
-| [scripts/test_lookback_oof.py](scripts/test_lookback_oof.py) | 라벨 계산 및 학습 재현성 단위 검증 |
-| [scripts/adaptive_models.py](scripts/adaptive_models.py) | Context 계산, Selector/ridge 학습, 선택한 Predictor 추론 |
-| [scripts/train_adaptive_selector.py](scripts/train_adaptive_selector.py) | 고정 설정 학습, 외부 배터리 평가, 정확도·시간 집계 |
-| [scripts/verify_adaptive_selector.py](scripts/verify_adaptive_selector.py) | 학습 전용 통계·저장 모델 예측·지표 독립 재검증 |
-| [scripts/test_adaptive_selector.py](scripts/test_adaptive_selector.py) | 미래 정보 차단·분류 기울기·모델 선택 경로 검증 |
-| [scripts/context_history_models.py](scripts/context_history_models.py) | Context 변수 묶음과 동일 크기 Predictor의 입력 추가 비교 |
-| [scripts/train_context_history.py](scripts/train_context_history.py) | 고정 설정의 Context·과거 이력 탐색 실험 |
-| [scripts/verify_context_history.py](scripts/verify_context_history.py) | 학습 전용 통계, 저장 모델, 예측·지표 검증 |
-| [scripts/test_context_history.py](scripts/test_context_history.py) | 입력 차단·순서 표현·미래 정보 차단 검사 |
-| `scripts/plot_*.py` | 검증된 결과를 Matplotlib 그림으로 생성 |
+| [scripts/preprocessing/preprocess_main.py](scripts/preprocessing/preprocess_main.py) | Cycle 구성, 정답·Context 생성, 분할·정규화 |
+| [scripts/preprocessing/battery_data.py](scripts/preprocessing/battery_data.py) | 동일 샘플의 LB10·20·50 입력 로더 |
+| [scripts/experiments/train_lookback_oof.py](scripts/experiments/train_lookback_oof.py) | Predictor 학습, OOF 예측, 라벨 생성 |
+| [scripts/validation/verify_preprocessing.py](scripts/validation/verify_preprocessing.py) | 원본·전처리·분할 검증 |
+| [scripts/validation/verify_lookback_oof.py](scripts/validation/verify_lookback_oof.py) | 모델·예측·라벨·Context 검증 |
+| [scripts/tests/test_lookback_oof.py](scripts/tests/test_lookback_oof.py) | 라벨 계산 및 학습 재현성 단위 검증 |
+| [scripts/models/adaptive_models.py](scripts/models/adaptive_models.py) | Context 계산, Selector/ridge 학습, 선택한 Predictor 추론 |
+| [scripts/experiments/train_adaptive_selector.py](scripts/experiments/train_adaptive_selector.py) | 고정 설정 학습, 외부 배터리 평가, 정확도·시간 집계 |
+| [scripts/validation/verify_adaptive_selector.py](scripts/validation/verify_adaptive_selector.py) | 학습 전용 통계·저장 모델 예측·지표 독립 재검증 |
+| [scripts/tests/test_adaptive_selector.py](scripts/tests/test_adaptive_selector.py) | 미래 정보 차단·분류 기울기·모델 선택 경로 검증 |
+| [scripts/models/context_history_models.py](scripts/models/context_history_models.py) | Context 변수 묶음과 동일 크기 Predictor의 입력 추가 비교 |
+| [scripts/experiments/train_context_history.py](scripts/experiments/train_context_history.py) | 고정 설정의 Context·과거 이력 탐색 실험 |
+| [scripts/validation/verify_context_history.py](scripts/validation/verify_context_history.py) | 학습 전용 통계, 저장 모델, 예측·지표 검증 |
+| [scripts/tests/test_context_history.py](scripts/tests/test_context_history.py) | 입력 차단·순서 표현·미래 정보 차단 검사 |
+| `scripts/plotting/plot_*.py` | 검증된 결과를 Matplotlib 그림으로 생성 |
 | [figures/soh_adaptive_framework_v3/](figures/soh_adaptive_framework_v3/) | 연결형 제안 구조도의 최신 생성 코드와 설명 |
 
 현재 연구는 **코드와 실행 문서만 공개**합니다.
@@ -367,13 +382,13 @@ data/raw/
 
 현재 저장소의 실행 기준은 **cycle 단위·측정 SOH 목표** 파이프라인입니다.
 이전 step 단위 예비 코드, 중간 그림 버전과 예비 출력은 현재 작업 구조에서 제거했습니다.
-정리 전 자료는 Git에서 제외된 `.local_archive/`에 로컬 보관합니다.
+사용하지 않는 예비 자료는 삭제했습니다. `.local_archive/script_layout_20261111/scripts/`에는 과거 실험의 코드 해시 검증에 필요한 폴더 이동 전 원본만 로컬 보관합니다.
 
 - `scripts/`: 현재 연구의 전처리·학습·검증·그림 코드.
 - `figures/soh_adaptive_framework_v3/`: 제안 구조도 생성 코드. 생성된 draw.io/SVG/PNG/PDF 파일은 Git에서 제외.
 - `data/`: 사용자가 준비한 원본과 생성된 전처리 데이터. Git에서 제외.
 - `outputs/`: 실험별 모델·예측·라벨·보고서·그림. 성능과 무관하게 연구 기록을 보존하며 Git에서 제외.
-- `.local_archive/`: 정리 전 예비 코드·자료. Git에서 제외.
+- `.local_archive/`: 과거 실험의 코드 해시 검증에 필요한 이동 전 소스. Git에서 제외.
 
 학습 코드와 실험 폴더의 `protocol.json`은 재현을 위한 해시로 연결되어 있습니다.
 완료된 실험의 모델 코드를 변경할 때는 새 실험 버전과 출력 경로를 사용합니다.
